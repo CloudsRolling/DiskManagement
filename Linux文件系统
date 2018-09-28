@@ -36,6 +36,7 @@
 #!/bin/bash
 i=1
 while [ $i -le 102400 ]
+
 	do
 	    touch $i.txt
 	    let i++
