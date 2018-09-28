@@ -1,0 +1,49 @@
+
+
+8位=1字节
+1024字节=1kb
+1024kb=1Mb
+1024Mb=1Gb
+1024Gb=1Tb
+
+
+通过inode删除文件？
+
+每个文件和目录都有自己唯一的inode数字。但是为什么用inode来删除文件，而不是用常用的rm -rf命令呢？原因是，如果你不小心创建了含有特殊字符的文件和目录，比如带有 ? * ^ 的文件名，就会很难删除。下面我们就来介绍一下：
+
+
+1）如何找出文件和目录的inode；
+2）配合find命令，删除特定的inode文件； 
+
+方法：
+1）用stat 或者ls -i等命令站到指定文件的inode；
+[root@localhost ~]# ls -i file
+或者
+[root@localhost ~]# stat file
+2）找到inode后，删除这个文件
+[root@localhost ~]# find ./ -inum [inode数字]
+[root@localhost ~]# find ./ -inum [inode数字] -exec rm -i {} /; 
+
+
+模拟inode耗尽:
+1）准备一个分区；
+2）查看该分区的inode总数；
+[root@localhost ~]# df -i
+3）创建和inode总数一样的空文件（可以使用脚本）；
+[root@localhost ~]# touch  /hehe{1..102400}.txt
+或者
+脚本:
+#!/bin/bash
+i=1
+while [ $i -le 102400 ]
+	do
+	    touch $i.txt
+	    let i++
+	done
+
+4）查看节点是否耗尽，能否继续创建文件；
+[root@localhost ~]# df -i
+[root@localhost ~]# touch a.txt
+5）删除不常用空文件，释放该分区的inode。
+[root@localhost ~]# rm -rf file
+
