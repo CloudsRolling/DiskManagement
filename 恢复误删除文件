@@ -1,0 +1,75 @@
+恢复误删除文件
+
+在数据被误删除后，第一时间要做的就是卸载被删除数据所在的分区，如果是根分区的数据遭到误删，就需要将系统进入单用户模式，并且将根分区以只读模式挂载。这样做的原因很简单，因为将文件删除后，仅仅是将文件的inode节点中的扇区指针清零，实际文件还储存在磁盘上，如果磁盘继续以读写模式挂载，这些已删除的文件的数据块就可能被操作系统重新分配出去，在这些数据库被新的数据覆盖后，这些数据就真的丢失了，恢复工具也无力回天。所以！以只读模式挂载磁盘可以尽量降低数据库中数据被覆盖的风险，以提高恢复数据成功的比例。
+
+
+
+1、安装依赖插件
+[root@localhost ~]# yum -y install e2fsprogs e2fsprogs-libs e2fsprogs-devel
+
+2、编译安装extundelete包
+[root@localhost ~]# tar -jxvf extundelete-0.2.4.tar.bz2 -C /usr/src/
+[root@localhost ~]# cd /usr/src/extundelete-0.2.4/
+[root@localhost ~]# ./configure --prefix=/usr/local/extundelete 
+[root@localhost ~]# make && make install
+[root@localhost ~]# ls /usr/local/extundelete/
+[root@localhost ~]# ln -s /usr/local/extundelete/bin/* /usr/local/bin
+[root@localhost ~]# extundelete -v	//查看版本
+
+3、恢复指定文件
+
+原理：从根节点(inode=2)开始找到被删除文件的i节点，然后recover i节点。
+
+
+注意：
+空文件和空目录不恢复
+
+[root@localhost ~]# mount /dev/sdb1 /www/
+[root@localhost ~]# mount	//查看挂载的权限
+[root@localhost ~]# mkdir /www/hehe
+[root@localhost ~]# cp /etc/httpd/conf/httpd.conf /www/hehe/
+
+[root@localhost ~]# rm -rf /www/hehe/		//模拟误删除
+
+当文件和目录误删除之后，立即将分区重新挂载，权限为ro
+[root@localhost ~]# umount /dev/sdb1 /www
+[root@localhost ~]# mount -o ro /dev/sdb1 /www/
+[root@localhost ~]# mount	//查看挂载的权限
+
+1）搜索已删除文件和目录（的i节点）
+[root@localhost ~]# /extundelete --inode 2 /dev/sdb1
+
+ --restore-inode	//i节点
+ --restore-file 	//指定文件
+ --restore-files	//多个文件 
+ --restore-directory	//指定目录
+
+注意：在当前目录下会产生RECOVERED_FILES/目录。用于存放恢复后的文件和目录
+[root@localhost ~]# ls RECOVERED_FILES/
+	
+2）按照inode节点恢复
+[root@localhost ~]# extundelete --inode 2 /dev/sdb1	
+[root@localhost ~]# extundelete --restore-inode 13 /dev/sdb1
+[root@localhost ~]# ls RECOVERED_FILES/		//注意：文件名改变，内容不变。
+[root@localhost ~]# cat RECOVERED_FILES/file.13 
+
+
+3）恢复指定文件：
+[root@localhost ~]# extundelete --inode 2 /dev/sdb1
+[root@localhost ~]# extundelete  /dev/sdb1 --restore-file passwd
+[root@localhost ~]# ls RECOVERED_FILES/
+[root@localhost ~]# cat RECOVERED_FILES/passwd 
+
+4）恢复指定目录：
+[root@localhost ~]# extundelete /dev/sda3 --restore-directory /hehe
+
+
+5）恢复所有文件：
+
+[root@localhost ~]# extundelete --restore-all /dev/sdb1		//回复所有
+
+6）恢复指定的时间点后被删文件：
+1)指定一个时间点
+# date -d "Sep 4 03:09:13 2013" +%s
+2)恢复这个时间点后的文件
+# extundelete --restore-all --after “1378235353” /dev/sdb1
