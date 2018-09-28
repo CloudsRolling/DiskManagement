@@ -1,7 +1,7 @@
 
-=====´´½¨Raid50µÄ²½Öè======
+=====åˆ›å»ºRaid50çš„æ­¥éª¤======
 
-1¡¢´´½¨·ÖÇø
+1ã€åˆ›å»ºåˆ†åŒº
 [root@localhost ~]# fdisk /dev/sdb
 [root@localhost ~]# fdisk /dev/sdc
 [root@localhost ~]# fdisk /dev/sdd
@@ -11,40 +11,40 @@
 [root@localhost ~]# fdisk /dev/sdh
 [root@localhost ~]# fdisk /dev/sdi
 
-2¡¢²é¿´RaidµÄ°æ±¾ÒÔ¼°°ïÖú
+2ã€æŸ¥çœ‹Raidçš„ç‰ˆæœ¬ä»¥åŠå¸®åŠ©
 [root@localhost ~]# mdadm --verson
 [root@localhost ~]# mdadm -V
 [root@localhost ~]# mdadm --help
 
-3¡¢²é¿´ÏµÍ³ÊÇ·ñÖ§³ÖRaid
+3ã€æŸ¥çœ‹ç³»ç»Ÿæ˜¯å¦æ”¯æŒRaid
 [root@localhost ~]# cat /proc/devices 
 [root@localhost ~]# cat /proc/devices | grep md
 [root@localhost ~]# ls /dev/md*
 
-4¡¢´´½¨Raid5
+4ã€åˆ›å»ºRaid5
 [root@localhost ~]# mdadm -C /dev/md0 -l5 -n3 -x1 /dev/sdb1 /dev/sdc1 /dev/sdd1 /dev/sde1
 
 [root@localhost ~]# mdadm -C /dev/md1 -l5 -n3 -x1 /dev/sdf1 /dev/sdg1 /dev/sdh1 /dev/sdi1 
-5¡¢²é¿´Raid5
+5ã€æŸ¥çœ‹Raid5
 [root@localhost ~]# ls /dev/md*
 [root@localhost ~]# mdadm -Ds
 [root@localhost ~]# mdadm -Ds /dev/md0
 [root@localhost ~]# mdadm -Ds /dev/md1
 
-6¡¢¸ñÊ½»¯Raid5£¨´Ë²½Öè¿ÉÊ¡ÂÔ£©
-×¢Òâ£º¿ÉÊ¹ÓÃRaid5
+6ã€æ ¼å¼åŒ–Raid5ï¼ˆæ­¤æ­¥éª¤å¯çœç•¥ï¼‰
+æ³¨æ„ï¼šå¯ä½¿ç”¨Raid5
 [root@localhost ~]# mkfs -t ext4 /dev/md0
 [root@localhost ~]# mkfs -t ext4 /dev/md1
 
-7¡¢´´½¨Raid50
-Ô­Àí£º½«2¸öRaid5Éú³É1¸öRaid0
+7ã€åˆ›å»ºRaid50
+åŸç†ï¼šå°†2ä¸ªRaid5ç”Ÿæˆ1ä¸ªRaid0
 [root@localhost ~]# mdadm -C /dev/md2 -l0 -n2 /dev/md0 /dev/md1 
 [root@localhost ~]# ls /dev/md*
 
-8¡¢¸ñÊ½»¯Raid50
+8ã€æ ¼å¼åŒ–Raid50
 [root@localhost ~]# mkfs -t ext4 /dev/md2
 
-9¡¢¹ÒÔØÊ¹ÓÃ
+9ã€æŒ‚è½½ä½¿ç”¨
 [root@localhost ~]# mkdir /www
 [root@localhost ~]# mount  /dev/md2 /www/
 [root@localhost ~]# df -hT 
